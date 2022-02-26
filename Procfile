@@ -1,1 +1,1 @@
-web: ./target/release/azizka_rust_my_routes
+web: ./target/release/azizka_rust_cat_s
