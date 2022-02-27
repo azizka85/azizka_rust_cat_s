@@ -1,8 +1,19 @@
 use std::env;
 use std::time::{ SystemTime, UNIX_EPOCH };
+use std::collections::HashMap;
 
-use tide::{Request, Result, Body};
+use tide::{Request, Response, Result, Body};
 use tide::prelude::{Deserialize, Serialize};
+use tide::http::mime::HTML;
+
+use sailfish::TemplateOnce;
+
+#[derive(TemplateOnce)]
+#[template(path = "hello.html")]
+struct HelloTemplate {
+	name: Option<String>,
+	tr: fn(key: &String, dic: &HashMap<String, String>) -> String
+}
 
 #[derive(Debug, Deserialize, Serialize)]
 struct User {
@@ -12,24 +23,61 @@ struct User {
 	password: String
 }
 
-async fn greeting(_: Request<()>) -> Result {
-	Ok(String::from("Hello, world!").into())
+fn tr(key: &String, dic: &HashMap<String, String>) -> String {
+	dic.get(key).unwrap_or(key).clone()
 }
 
-async fn greeting_name(req: Request<()>) -> Result {
-	Ok(format!("Hello {}!", req.param("name").unwrap()).into())
+async fn greeting(_: Request<()>) -> Result<Response> {
+	let mut res = Response::new(200);
+	res.set_content_type(HTML);
+	res.set_body(
+		Body::from_string(
+			HelloTemplate { 
+				name: None,
+				tr: tr 
+			}
+			.render_once()
+			.unwrap()
+		)
+	);
+	
+	Ok(res)
 }
 
-async fn post_user(mut req: Request<()>) -> Result<Body> {
+async fn greeting_name(req: Request<()>) -> Result<Response> {
+	let mut res = Response::new(200);
+	res.set_content_type(HTML);
+	res.set_body(
+		Body::from_string(
+			HelloTemplate { 
+				name: Some(req.param("name")
+								.unwrap()
+								.into()),
+				tr: tr 
+			}
+			.render_once()
+			.unwrap()
+		)
+	);
+	
+	Ok(res)
+}
+
+async fn post_user(mut req: Request<()>) -> Result<Response> {
 	let user = req.body_json().await?;
 
-	Body::from_json(&User {		
-		id: Some(SystemTime::now()
-					.duration_since(UNIX_EPOCH)
-					.expect("Time went backwards")
-					.as_millis()),
-		..user
-	})
+	let mut res = Response::new(201);	
+	res.set_body(
+		Body::from_json(&User {		
+			id: Some(SystemTime::now()
+						.duration_since(UNIX_EPOCH)
+						.expect("Time went backwards")
+						.as_millis()),
+			..user
+		}).unwrap()
+	);
+
+	Ok(res)
 }
 
 #[async_std::main]

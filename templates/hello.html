@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hello</title>
+</head>
+<body>
+  <% let greeting = String::from("Halo"); %> 
+  <%= greeting %>, <%= name.unwrap_or(String::from("World")) %>!   
+  <br>
+  Translate name: <%= tr(
+    &String::from("name"), 
+    &HashMap::from([
+      (String::from("name"), String::from("Aziz"))
+    ])
+  ) %>
+  <br>
+  Translate test: <%= tr(
+    &String::from("test"), 
+    &HashMap::from([
+      (String::from("name"), String::from("Aziz"))
+    ])
+  ) %>
+</body>
+</html>
