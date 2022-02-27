@@ -42,7 +42,7 @@ async fn main() -> tide::Result<()> {
 
 	app.at("/").get(greeting);
 	app.at("/post").post(post_user);
-	app.at("/{name}").get(greeting_name);	
+	app.at("/:name").get(greeting_name);	
 
 	app.listen(format!("0.0.0.0:{port}")).await?;
 
